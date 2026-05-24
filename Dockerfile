@@ -8,10 +8,15 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-# Generate Prisma client for both providers
+# Generate both Prisma clients — postgresql last so its engine is available at runtime
+# The sqlite client is used during the Next.js build (no DB needed)
 RUN DATABASE_URL=file:./dev.db npx prisma generate --schema=prisma/schema.sqlite.prisma
+# Save sqlite client artifacts before overwriting with pg client
+RUN cp -r node_modules/.prisma/client node_modules/.prisma/client-sqlite
 RUN DATABASE_URL=file:./dev.db npx prisma generate --schema=prisma/schema.postgresql.prisma
-# Force SQLite during build so prisma.ts uses the libsql adapter (no DB connection needed)
+RUN cp -r node_modules/.prisma/client node_modules/.prisma/client-postgresql
+# Restore sqlite client for the build
+RUN cp -r node_modules/.prisma/client-sqlite/. node_modules/.prisma/client/
 RUN DATABASE_URL=file:./dev.db npm run build
 
 FROM node:20-alpine AS runner
