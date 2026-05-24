@@ -18,7 +18,7 @@ fi
 
 # Swap in the correct pre-built Prisma client
 echo "Activating Prisma client for $SCHEMA..."
-cp -r "${CLIENT_SRC}/." node_modules/.prisma/client/
+cp -rf "${CLIENT_SRC}/." node_modules/.prisma/client/
 
 echo "Running database migrations ($SCHEMA)..."
 node_modules/.bin/prisma migrate deploy --schema="$SCHEMA"
