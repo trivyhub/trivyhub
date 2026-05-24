@@ -8,10 +8,11 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-# Generate Prisma client (sqlite schema used at build time, runtime will use the right one)
+# Generate Prisma client for both providers
 RUN DATABASE_URL=file:./dev.db npx prisma generate --schema=prisma/schema.sqlite.prisma
 RUN DATABASE_URL=file:./dev.db npx prisma generate --schema=prisma/schema.postgresql.prisma
-RUN npm run build
+# Force SQLite during build so prisma.ts uses the libsql adapter (no DB connection needed)
+RUN DATABASE_URL=file:./dev.db npm run build
 
 FROM node:20-alpine AS runner
 WORKDIR /app
