@@ -4,7 +4,8 @@ function createPrismaClient() {
   const url = process.env.DATABASE_URL ?? "file:./data/trivyhub.db";
 
   if (url.startsWith("postgres")) {
-    return new PrismaClient();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return new PrismaClient({ datasources: { db: { url } } } as any);
   }
 
   // SQLite via libsql (dev / simple docker run)
