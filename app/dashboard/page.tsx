@@ -116,7 +116,9 @@ function EvoTooltip({ active, payload, label }: { active?: boolean; payload?: { 
   );
 }
 
-function EvoChart({ data, height = 220 }: { data: Record<string, number | string>[]; height?: number }) {
+interface EvoPoint { date: string; critical: number; high: number; medium: number; }
+
+function EvoChart({ data, height = 220 }: { data: EvoPoint[]; height?: number }) {
   const maxVal = Math.max(...data.map(d => Math.max(d.critical, d.high, d.medium)), 1);
 
   return (
