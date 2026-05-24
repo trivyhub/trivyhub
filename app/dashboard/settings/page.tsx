@@ -159,7 +159,7 @@ export default function SettingsPage() {
             </Field>
             <Field label="CLI install">
               <div style={{ background: "#050507", border: "1px solid var(--border)", borderRadius: 8, padding: "8px 12px", fontFamily: "var(--font-mono)", fontSize: 12, color: "oklch(0.78 0.16 280)", overflowX: "auto" }}>
-                curl -L https://github.com/theo-mrn/trivy_dashboard/releases/latest/download/trivy-push-linux-amd64 -o trivy-push
+                curl -L https://github.com/trivyhub/trivy-dashboard-web/releases/latest/download/trivy-push-linux-amd64 -o trivy-push
               </div>
             </Field>
           </div>

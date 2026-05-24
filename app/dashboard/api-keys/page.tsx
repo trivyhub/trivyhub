@@ -184,7 +184,7 @@ export default function APIKeysPage() {
         </div>
         <p style={{ fontSize: 12, color: "var(--fg-faint)", marginTop: 12 }}>
           Or use the{" "}
-          <a href="https://github.com/theo-mrn/trivy_dashboard/blob/main/.github/actions/trivy-push/action.yml"
+          <a href="https://github.com/trivyhub/trivy-dashboard-web/blob/main/.github/actions/trivy-push/action.yml"
             target="_blank" rel="noopener noreferrer"
             style={{ color: "var(--violet)", textDecoration: "none" }}>
             GitHub Action
