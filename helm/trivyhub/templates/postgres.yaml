@@ -17,6 +17,9 @@ metadata:
 spec:
   accessModes:
     - ReadWriteOnce
+  {{- if .Values.postgres.storageClass }}
+  storageClassName: {{ .Values.postgres.storageClass }}
+  {{- end }}
   resources:
     requests:
       storage: {{ .Values.postgres.storageSize }}
@@ -41,6 +44,9 @@ spec:
           envFrom:
             - secretRef:
                 name: {{ .Release.Name }}-postgres
+          env:
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
           volumeMounts:
             - name: data
               mountPath: /var/lib/postgresql/data
