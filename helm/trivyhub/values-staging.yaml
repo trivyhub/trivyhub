@@ -12,8 +12,6 @@ ingress:
   certResolver: letsencrypt
 
 env:
-  DATABASE_PROVIDER: "postgresql"
-  DATABASE_URL: "postgresql://trivyhub:d2554f948e7f4e1e60ef98bf18101cee@trivyhub-postgres:5432/trivyhub"
   JWT_SECRET: "07187d23d047e89c6f3f8085251658b6fcd5c479516191d24ae24838558f602a"
 
 postgres:

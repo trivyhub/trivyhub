@@ -26,6 +26,11 @@ spec:
                 secretKeyRef:
                   name: {{ .Release.Name }}-secret
                   key: DATABASE_URL
+            - name: DATABASE_PROVIDER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-secret
+                  key: DATABASE_PROVIDER
             - name: JWT_SECRET
               valueFrom:
                 secretKeyRef:
