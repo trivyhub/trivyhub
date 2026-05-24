@@ -1,5 +1,5 @@
 image:
-  repository: ghcr.io/ton-org/trivyhub
+  repository: ghcr.io/trivyhub/trivy-dashboard-web
   tag: "latest"
   pullPolicy: IfNotPresent
 
@@ -11,23 +11,23 @@ service:
 
 ingress:
   enabled: false
-  className: ""
-  host: trivyhub.exemple.com
-  tls: false
-  tlsSecretName: ""
+  host: trivyhub.example.com
+  annotations: {}
+  tls:
+    enabled: false
+    secretName: trivyhub-tls
 
 env:
   JWT_SECRET: "change-me-in-production"
-  DATABASE_URL: "postgresql://trivyhub:secret@postgres:5432/trivyhub"
 
-# Optionnel : déployer PostgreSQL dans le même chart
 postgres:
   enabled: true
   image: postgres:16-alpine
   database: trivyhub
   user: trivyhub
-  password: secret
+  password: "change-me-in-production"
   storageSize: 5Gi
+  storageClass: ""
 
 resources:
   requests:

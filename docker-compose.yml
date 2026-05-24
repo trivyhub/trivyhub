@@ -1,6 +1,6 @@
 services:
   app:
-    image: ghcr.io/ton-org/trivyhub:latest
+    image: ghcr.io/trivyhub/trivy-dashboard-web:latest
     # build: .   # décommente pour builder localement
     restart: unless-stopped
     ports:

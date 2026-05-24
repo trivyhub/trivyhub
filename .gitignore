@@ -39,3 +39,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Personal helm values (infra-specific)
+helm/*/values-*.yaml
+!helm/*/values.yaml

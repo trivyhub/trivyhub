@@ -2,6 +2,9 @@
 
 Self-hosted dashboard for [Trivy](https://trivy.dev) vulnerability reports. Push scan results from your CI pipelines and visualize them in one place.
 
+![License](https://img.shields.io/github/license/trivyhub/trivy-dashboard-web)
+![Docker Image](https://img.shields.io/badge/ghcr.io-trivyhub%2Ftrivy--dashboard--web-blue)
+
 ## Features
 
 - **Overview** — global risk score, CVE trend chart, top at-risk projects
@@ -18,24 +21,27 @@ Self-hosted dashboard for [Trivy](https://trivy.dev) vulnerability reports. Push
 
 | Component | Technology |
 |-----------|------------|
-| Framework | Next.js 16 (App Router) |
+| Framework | Next.js (App Router) |
 | Language | TypeScript |
-| ORM | Prisma 7 (SQLite or PostgreSQL) |
+| ORM | Prisma (SQLite or PostgreSQL) |
 | Charts | Recharts |
 | Icons | Lucide React |
 
 ---
 
-## Deployment
+## Quick Start
 
-### Option 1 — `docker run` (SQLite, zero config)
+### Option 1 — Docker (SQLite, zero config)
+
+The simplest way to get started. Data is persisted in a Docker volume.
 
 ```bash
 docker run -d \
+  --name trivyhub \
   -p 3000:3000 \
   -e JWT_SECRET=$(openssl rand -hex 32) \
   -v trivyhub-data:/app/data \
-  ghcr.io/ton-org/trivyhub:latest
+  ghcr.io/trivyhub/trivy-dashboard-web:latest
 ```
 
 Open [http://localhost:3000](http://localhost:3000) and create your account.
@@ -45,7 +51,15 @@ Open [http://localhost:3000](http://localhost:3000) and create your account.
 ### Option 2 — Docker Compose (PostgreSQL, recommended for production)
 
 ```bash
-curl -O https://raw.githubusercontent.com/ton-org/trivyhub/main/docker-compose.yml
+curl -O https://raw.githubusercontent.com/trivyhub/trivy-dashboard-web/main/docker-compose.yml
+JWT_SECRET=$(openssl rand -hex 32) POSTGRES_PASSWORD=$(openssl rand -hex 16) docker compose up -d
+```
+
+Or clone the repo and run:
+
+```bash
+git clone https://github.com/trivyhub/trivy-dashboard-web.git
+cd trivy-dashboard-web
 JWT_SECRET=$(openssl rand -hex 32) POSTGRES_PASSWORD=$(openssl rand -hex 16) docker compose up -d
 ```
 
@@ -54,29 +68,42 @@ JWT_SECRET=$(openssl rand -hex 32) POSTGRES_PASSWORD=$(openssl rand -hex 16) doc
 ### Option 3 — Kubernetes / Helm
 
 ```bash
-helm install trivyhub ./helm/trivyhub \
+helm install trivyhub oci://ghcr.io/trivyhub/charts/trivy-dashboard-web \
   --set env.JWT_SECRET=$(openssl rand -hex 32) \
-  --set env.DATABASE_URL=postgresql://trivyhub:secret@postgres:5432/trivyhub \
+  --set postgres.password=$(openssl rand -hex 16) \
   --set ingress.enabled=true \
-  --set ingress.host=trivyhub.votre-entreprise.com
+  --set ingress.host=trivyhub.your-company.com
 ```
 
-With TLS:
+Or from source:
+
+```bash
+git clone https://github.com/trivyhub/trivy-dashboard-web.git
+cd trivy-dashboard-web
+
+helm install trivyhub ./helm/trivyhub \
+  --set env.JWT_SECRET=$(openssl rand -hex 32) \
+  --set postgres.password=$(openssl rand -hex 16) \
+  --set ingress.enabled=true \
+  --set ingress.host=trivyhub.your-company.com
+```
+
+With TLS (cert-manager):
 
 ```bash
 helm install trivyhub ./helm/trivyhub \
   --set env.JWT_SECRET=$(openssl rand -hex 32) \
-  --set env.DATABASE_URL=postgresql://... \
+  --set postgres.password=$(openssl rand -hex 16) \
   --set ingress.enabled=true \
-  --set ingress.host=trivyhub.votre-entreprise.com \
-  --set ingress.tls=true \
-  --set ingress.tlsSecretName=trivyhub-tls
+  --set ingress.host=trivyhub.your-company.com \
+  --set ingress.tls.enabled=true \
+  --set ingress.tls.secretName=trivyhub-tls
 ```
 
-### HTTPS with Caddy (recommended for VPS)
+#### HTTPS with Caddy (VPS)
 
 ```
-trivyhub.votre-entreprise.com {
+trivyhub.your-company.com {
     reverse_proxy localhost:3000
 }
 ```
@@ -92,24 +119,6 @@ Caddy handles Let's Encrypt automatically.
 In TrivyHub: **Settings → API Keys → New key**
 
 ### 2. Add to your pipeline
-
-**GitLab CI:**
-
-```yaml
-trivy-scan:
-  script:
-    - trivy image --format json --output report.json $IMAGE
-    - curl -X POST \
-        -H "Authorization: Bearer $TRIVYHUB_TOKEN" \
-        -F "project=$CI_PROJECT_NAME" \
-        -F "file=@report.json" \
-        -F "environment=production" \
-        -F "branch=$CI_COMMIT_REF_NAME" \
-        -F "commit=$CI_COMMIT_SHA" \
-        -F "pipeline_url=$CI_JOB_URL" \
-        -F "triggered_by=$GITLAB_USER_LOGIN" \
-        https://trivyhub.votre-entreprise.com/api/v1/report
-```
 
 **GitHub Actions:**
 
@@ -128,41 +137,66 @@ trivy-scan:
       -F "commit=${{ github.sha }}" \
       -F "pipeline_url=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
       -F "triggered_by=${{ github.actor }}" \
-      https://trivyhub.votre-entreprise.com/api/v1/report
+      https://trivyhub.your-company.com/api/v1/report
 ```
 
-### Optional fields
+**GitLab CI:**
 
-| Field | Description | Example |
-|-------|-------------|---------|
-| `project` | Project name (required) | `mon-api` |
-| `file` | Trivy JSON report (required) | `@report.json` |
-| `environment` | Target environment | `production` |
-| `branch` | Git branch | `main` |
-| `commit` | Git commit SHA | `abc1234` |
-| `pipeline_url` | Link to CI job | `https://gitlab.com/...` |
-| `pipeline_id` | CI job ID | `12345` |
-| `triggered_by` | User who triggered | `alice` |
-| `owner` | Team responsible | `team-backend` |
+```yaml
+trivy-scan:
+  script:
+    - trivy image --format json --output report.json $IMAGE
+    - curl -X POST \
+        -H "Authorization: Bearer $TRIVYHUB_TOKEN" \
+        -F "project=$CI_PROJECT_NAME" \
+        -F "file=@report.json" \
+        -F "environment=production" \
+        -F "branch=$CI_COMMIT_REF_NAME" \
+        -F "commit=$CI_COMMIT_SHA" \
+        -F "pipeline_url=$CI_JOB_URL" \
+        -F "triggered_by=$GITLAB_USER_LOGIN" \
+        https://trivyhub.your-company.com/api/v1/report
+```
+
+### API fields
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `project` | **Yes** | Project name |
+| `file` | **Yes** | Trivy JSON report |
+| `environment` | No | Target environment (`production`, `staging`...) |
+| `branch` | No | Git branch |
+| `commit` | No | Git commit SHA |
+| `pipeline_url` | No | Link to CI job |
+| `pipeline_id` | No | CI job ID |
+| `triggered_by` | No | User who triggered the scan |
+| `owner` | No | Team responsible |
 
 ---
 
 ## Environment variables
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `JWT_SECRET` | **Yes** | Secret for signing JWT tokens. Generate with `openssl rand -hex 32` |
-| `DATABASE_URL` | No | PostgreSQL URL. Defaults to SQLite (`file:/app/data/trivyhub.db`) |
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `JWT_SECRET` | **Yes** | — | Secret for signing JWT tokens. Generate with `openssl rand -hex 32` |
+| `DATABASE_URL` | No | SQLite (`file:/app/data/trivyhub.db`) | PostgreSQL connection string |
+| `DATABASE_PROVIDER` | No | `sqlite` | Set to `postgresql` when using PostgreSQL |
 
 ---
 
 ## Local development
 
 ```bash
-git clone https://github.com/ton-org/trivyhub.git
-cd trivyhub
+git clone https://github.com/trivyhub/trivy-dashboard-web.git
+cd trivy-dashboard-web
 npm install
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000)
+
+---
+
+## License
+
+MIT
