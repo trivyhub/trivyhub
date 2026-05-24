@@ -73,12 +73,12 @@ const SEV_CSS = {
   medium:   "oklch(0.82 0.16 90)",
 };
 
-function EvoTooltip({ active, payload, label }: any) {
+function EvoTooltip({ active, payload, label }: { active?: boolean; payload?: { dataKey: string; name: string; color: string; value: number }[]; label?: string }) {
   if (!active || !payload?.length) return null;
   return (
     <div style={{ background: "#111114", border: "1px solid rgba(255,255,255,0.10)", borderRadius: 8, padding: "10px 14px", fontSize: 11, fontFamily: "var(--font-mono)", boxShadow: "0 8px 32px rgba(0,0,0,0.6)", minWidth: 130 }}>
       <div style={{ color: "#71717a", marginBottom: 8, fontSize: 10 }}>{label}</div>
-      {payload.map((p: any) => (
+      {payload.map((p) => (
         <div key={p.dataKey} style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 4 }}>
           <span style={{ width: 8, height: 8, borderRadius: 2, background: p.color, display: "inline-block", flexShrink: 0 }}/>
           <span style={{ flex: 1, color: "#a1a1aa" }}>{p.name}</span>
@@ -349,7 +349,7 @@ export default function ProjectDetailPage() {
           <div style={{ height: 1, background: "var(--border)", margin: "16px 0" }}/>
           <Link href={`/dashboard/projects/${encodeURIComponent(name)}/history`}
             style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, padding: "8px", borderRadius: 8, border: "1px solid var(--border)", fontSize: 12.5, color: "var(--fg-muted)", textDecoration: "none", transition: "all 140ms ease" }}>
-            Voir l'historique complet
+            Voir l&apos;historique complet
           </Link>
         </Spotlight>
 

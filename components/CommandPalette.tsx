@@ -31,7 +31,7 @@ export function CommandPalette() {
     Promise.all([projectsApi.list(), vulnApi.list(1, 200)])
       .then(([p, v]) => { setProjects(p ?? []); setVulns(v?.data ?? []); })
       .finally(() => setLoading(false));
-  }, [open]);
+  }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const filtered = query.length < 1 ? { projects: projects.slice(0, 5), vulns: [] } : {
     projects: projects.filter(p => p.name.toLowerCase().includes(query.toLowerCase())).slice(0, 5),

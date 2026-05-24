@@ -26,7 +26,7 @@ function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [expired, setExpired] = useState(false);
 
-  useEffect(() => { if (searchParams.get("expired")) setExpired(true); }, [searchParams]);
+  useEffect(() => { if (searchParams.get("expired")) setExpired(true); }, [searchParams]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

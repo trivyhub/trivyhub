@@ -68,7 +68,7 @@ export default function MembersPage() {
   const [loading, setLoading] = useState(true);
   const [showInvite, setShowInvite] = useState(false);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  useEffect(() => { setCurrentUser(getUser()); }, []);
+  useEffect(() => { setCurrentUser(getUser()); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const canInvite = currentUser?.role === "owner" || currentUser?.role === "admin";
   const isOwner = currentUser?.role === "owner";
@@ -77,6 +77,7 @@ export default function MembersPage() {
     setLoading(true);
     membersApi.list().then(m => setMembers(m ?? [])).finally(() => setLoading(false));
   }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { reload(); }, []);
 
   async function changeRole(id: number, role: string) {

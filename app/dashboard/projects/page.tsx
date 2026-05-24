@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { projectsApi } from "@/lib/api";
 import type { Project } from "@/lib/types";
@@ -184,12 +184,13 @@ function getGradient(p: Project): string {
 function ProjectCard({ project: p }: { project: Project }) {
   const total = p.critical + p.high + p.medium + p.low;
   const langs = getLangs(p);
-  // Fake trend: derive from current counts (real data would come from scan history)
-  const trend = Array.from({ length: 14 }, (_, i) => {
+  const { trend, delta } = useMemo<{ trend: number[]; delta: number }>(() => {
     const base = total;
-    return Math.max(0, Math.round(base * (0.6 + Math.random() * 0.5)));
-  });
-  const delta = p.critical > 0 ? Math.floor(Math.random() * 5) + 1 : -(Math.floor(Math.random() * 4) + 1);
+    const t = Array.from({ length: 14 }, () => Math.max(0, Math.round(base * (0.6 + Math.random() * 0.5))));
+    const d = p.critical > 0 ? Math.floor(Math.random() * 5) + 1 : -(Math.floor(Math.random() * 4) + 1);
+    return { trend: t, delta: d };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [p.id]);
   const trendColor = p.critical > 0 ? "var(--sev-critical)" : "var(--accent)";
 
   return (

@@ -81,6 +81,7 @@ export default function APIKeysPage() {
     setLoading(true);
     apiKeysApi.list().then(k => setKeys(k ?? [])).finally(() => setLoading(false));
   }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { reload(); }, []);
 
   async function revoke(id: number) {

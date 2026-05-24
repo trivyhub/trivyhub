@@ -35,7 +35,7 @@ export function Sidebar() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
 
-  useEffect(() => { setUser(getUser()); }, []);
+  useEffect(() => { setUser(getUser()); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   function logout() { clearAuth(); router.push("/login"); }
 

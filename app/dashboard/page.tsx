@@ -95,7 +95,7 @@ const SEV_CSS: Record<string, string> = {
   low:      "oklch(0.70 0.14 245)",
 };
 
-function EvoTooltip({ active, payload, label }: any) {
+function EvoTooltip({ active, payload, label }: { active?: boolean; payload?: { dataKey: string; name: string; color: string; value: number }[]; label?: string }) {
   if (!active || !payload?.length) return null;
   return (
     <div style={{
@@ -105,7 +105,7 @@ function EvoTooltip({ active, payload, label }: any) {
       boxShadow: "0 8px 32px rgba(0,0,0,0.6)", minWidth: 130,
     }}>
       <div style={{ color: "#71717a", marginBottom: 8, fontSize: 10, letterSpacing: "0.05em" }}>{label}</div>
-      {payload.map((p: any) => (
+      {payload.map((p) => (
         <div key={p.dataKey} style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 4 }}>
           <span style={{ width: 8, height: 8, borderRadius: 2, background: p.color, display: "inline-block", flexShrink: 0 }}/>
           <span style={{ flex: 1, color: "#a1a1aa" }}>{p.name}</span>
@@ -116,7 +116,7 @@ function EvoTooltip({ active, payload, label }: any) {
   );
 }
 
-function EvoChart({ data, height = 220 }: { data: Record<string, any>[]; height?: number }) {
+function EvoChart({ data, height = 220 }: { data: Record<string, number | string>[]; height?: number }) {
   const maxVal = Math.max(...data.map(d => Math.max(d.critical, d.high, d.medium)), 1);
 
   return (
@@ -575,7 +575,7 @@ export default function OverviewPage() {
             }}>
               <span style={{ color: "var(--fg-faint)", fontStyle: "italic" }}># trivihub-scan.yml</span>{"\n"}
               <span style={{ color: "oklch(0.78 0.16 280)" }}>- name</span>{": "}
-              <span style={{ color: "oklch(0.85 0.16 130)" }}>"Scan with Trivy"</span>{"\n"}
+              <span style={{ color: "oklch(0.85 0.16 130)" }}>&quot;Scan with Trivy&quot;</span>{"\n"}
               {"  "}<span style={{ color: "oklch(0.78 0.16 280)" }}>uses</span>{": "}
               <span style={{ color: "oklch(0.85 0.16 130)" }}>trivihub/scan-action@v1</span>{"\n"}
               {"  "}<span style={{ color: "oklch(0.78 0.16 280)" }}>with</span>:{"\n"}
