@@ -21,7 +21,7 @@ postgres:
   user: trivyhub
   password: "d2554f948e7f4e1e60ef98bf18101cee"
   storageSize: 2Gi
-  storageClass: longhorn
+  storageClass: longhorn-single
 
 resources:
   requests:
