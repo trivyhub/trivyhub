@@ -4,8 +4,6 @@ on:
   push:
     branches-ignore:
       - "gitops/**"
-    paths-ignore:
-      - "kubernetes/**"
   pull_request:
     branches: ["**"]
 
@@ -93,12 +91,14 @@ jobs:
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
           no-cache: true
 
-  # ─── Deploy via ArgoCD ────────────────────────────────────────────────────────
+  # ─── Deploy via GitOps ────────────────────────────────────────────────────────
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
     needs: build-push
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
@@ -106,28 +106,26 @@ jobs:
         id: env
         run: |
           if [ "${{ github.ref }}" = "refs/heads/main" ]; then
-            echo "manifest=kubernetes/prod/app.yml"       >> $GITHUB_OUTPUT
-            echo "gitops_branch=gitops/prod"              >> $GITHUB_OUTPUT
-            echo "url=https://trivyhub.cluster.afflair.app/api/healthz" >> $GITHUB_OUTPUT
+            echo "values=helm/trivyhub/values-prod.yaml" >> $GITHUB_OUTPUT
+            echo "gitops_branch=gitops/prod"             >> $GITHUB_OUTPUT
           else
-            echo "manifest=kubernetes/staging/app.yml"   >> $GITHUB_OUTPUT
-            echo "gitops_branch=gitops/staging"           >> $GITHUB_OUTPUT
-            echo "url=https://stag.trivyhub.cluster.afflair.app/api/healthz" >> $GITHUB_OUTPUT
+            echo "values=helm/trivyhub/values-staging.yaml" >> $GITHUB_OUTPUT
+            echo "gitops_branch=gitops/staging"             >> $GITHUB_OUTPUT
           fi
 
-      - name: Update image tag in manifest
+      - name: Update image tag in helm values
         run: |
-          sed -i "s|image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:.*|image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}|g" ${{ steps.env.outputs.manifest }}
+          sed -i "s|tag: .*|tag: \"${{ github.sha }}\"|g" ${{ steps.env.outputs.values }}
 
       - name: Commit & push to gitops branch
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          cp ${{ steps.env.outputs.manifest }} /tmp/app.yml
+          cp ${{ steps.env.outputs.values }} /tmp/values.yaml
           git fetch origin ${{ steps.env.outputs.gitops_branch }} || true
           git checkout -B ${{ steps.env.outputs.gitops_branch }} origin/${{ steps.env.outputs.gitops_branch }} 2>/dev/null || git checkout -B ${{ steps.env.outputs.gitops_branch }}
-          cp /tmp/app.yml ${{ steps.env.outputs.manifest }}
-          git add ${{ steps.env.outputs.manifest }}
+          cp /tmp/values.yaml ${{ steps.env.outputs.values }}
+          git add ${{ steps.env.outputs.values }}
           git commit -m "chore: deploy → ${{ github.sha }}"
           git push origin ${{ steps.env.outputs.gitops_branch }} --force
 
