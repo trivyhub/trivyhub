@@ -113,18 +113,13 @@ jobs:
             echo "gitops_branch=gitops/staging"             >> $GITHUB_OUTPUT
           fi
 
-      - name: Update image tag in helm values
-        run: |
-          sed -i "s|tag: .*|tag: \"${{ github.sha }}\"|g" ${{ steps.env.outputs.values }}
-
       - name: Commit & push to gitops branch
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          cp ${{ steps.env.outputs.values }} /tmp/values.yaml
           git fetch origin ${{ steps.env.outputs.gitops_branch }} || true
           git checkout -B ${{ steps.env.outputs.gitops_branch }} origin/${{ steps.env.outputs.gitops_branch }} 2>/dev/null || git checkout -B ${{ steps.env.outputs.gitops_branch }}
-          cp /tmp/values.yaml ${{ steps.env.outputs.values }}
+          sed -i "s|tag: .*|tag: \"${{ github.sha }}\"|g" ${{ steps.env.outputs.values }}
           git add ${{ steps.env.outputs.values }}
           git commit -m "chore: deploy → ${{ github.sha }}"
           git push origin ${{ steps.env.outputs.gitops_branch }} --force
