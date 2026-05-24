@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: trivyhub
-          image: ghcr.io/theo-mrn/trivy-dashboard-web:latest  # updated by CI
+          image: ghcr.io/theo-mrn/trivy-dashboard-web:0ebfbd248a10f1b9817466f8de363894721ffba9
           imagePullPolicy: Always
           ports:
             - containerPort: 3000
