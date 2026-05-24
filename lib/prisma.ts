@@ -4,8 +4,11 @@ function createPrismaClient() {
   const url = process.env.DATABASE_URL ?? "file:./data/trivyhub.db";
 
   if (url.startsWith("postgres")) {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { PrismaPg } = require("@prisma/adapter-pg");
+    const adapter = new PrismaPg({ connectionString: url });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return new PrismaClient({ datasources: { db: { url } } } as any);
+    return new PrismaClient({ adapter } as any);
   }
 
   // SQLite via libsql (dev / simple docker run)
