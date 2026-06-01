@@ -1,5 +1,5 @@
 image:
-  repository: ghcr.io/trivyhub/trivy-dashboard-web
+  repository: ghcr.io/trivyhub/trivyhub
   tag: "81be262f084ea1789997848debbb2c9890fbebc7"
   pullPolicy: Always
 
