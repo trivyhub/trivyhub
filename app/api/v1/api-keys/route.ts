@@ -11,6 +11,26 @@ function generateKey() {
   return { full, prefix, hash };
 }
 
+function serializeKey(k: {
+  id: number;
+  organizationId: number;
+  name: string;
+  keyPrefix: string;
+  createdAt: Date;
+  lastUsedAt: Date | null;
+  revoked: boolean;
+}) {
+  return {
+    id: k.id,
+    organization_id: k.organizationId,
+    name: k.name,
+    key_prefix: k.keyPrefix,
+    created_at: k.createdAt,
+    last_used_at: k.lastUsedAt,
+    revoked: k.revoked,
+  };
+}
+
 export async function GET(req: NextRequest) {
   const claims = await authenticate(req);
   if (claims instanceof NextResponse) return claims;
@@ -23,7 +43,9 @@ export async function GET(req: NextRequest) {
     orderBy: { createdAt: "desc" },
   });
 
-  return NextResponse.json(keys);
+  // Snake_case per the APIKey contract (lib/types.ts) — raw Prisma camelCase
+  // leaves created_at undefined and crashes the api-keys page's date format.
+  return NextResponse.json(keys.map(serializeKey));
 }
 
 export async function POST(req: NextRequest) {
@@ -42,5 +64,5 @@ export async function POST(req: NextRequest) {
     data: { organizationId: claims.organizationId, name, keyHash: hash, keyPrefix: prefix },
   });
 
-  return NextResponse.json({ ...key, key: full }, { status: 201 });
+  return NextResponse.json({ ...serializeKey(key), key: full }, { status: 201 });
 }
