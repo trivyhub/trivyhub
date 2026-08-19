@@ -58,5 +58,24 @@ export async function GET(req: NextRequest) {
     (a, b) => (SEVERITY_ORDER[a.severity] ?? 5) - (SEVERITY_ORDER[b.severity] ?? 5)
   );
 
-  return NextResponse.json({ data: sorted, total, page, limit });
+  // Serialize to the snake_case Vulnerability contract (lib/types.ts), like
+  // the projects route does — raw Prisma camelCase crashes the dashboard's
+  // date formatting (RangeError: Invalid time value on undefined fields).
+  const data = sorted.map((v) => ({
+    id: v.id,
+    scan_id: v.scanId,
+    cve_id: v.cveId,
+    severity: v.severity,
+    package_name: v.packageName,
+    installed_version: v.installedVersion,
+    fixed_version: v.fixedVersion,
+    title: v.title,
+    description: v.description,
+    primary_url: v.primaryUrl,
+    is_fixed: v.isFixed,
+    first_seen_at: v.firstSeenAt,
+    cvss_score: v.cvssScore,
+  }));
+
+  return NextResponse.json({ data, total, page, limit });
 }

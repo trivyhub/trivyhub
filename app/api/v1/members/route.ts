@@ -12,7 +12,17 @@ export async function GET(req: NextRequest) {
     orderBy: { createdAt: "asc" },
   });
 
-  return NextResponse.json(users.map(({ passwordHash: _, ...u }) => u));
+  // Snake_case per the User contract (lib/types.ts) — the members page shows
+  // "—" for every join date because created_at is undefined on raw Prisma rows.
+  return NextResponse.json(
+    users.map((u) => ({
+      id: u.id,
+      organization_id: u.organizationId,
+      email: u.email,
+      role: u.role,
+      created_at: u.createdAt,
+    }))
+  );
 }
 
 export async function POST(req: NextRequest) {
