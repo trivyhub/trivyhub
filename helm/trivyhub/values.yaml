@@ -28,6 +28,17 @@ postgres:
   user: trivyhub
   password: secret
   storageSize: 5Gi
+  # Sans requests, le scheduler place ce pod a l'aveugle : il ne reserve rien
+  # et surengage le noeud. Sans limits, un emballement peut evincer les
+  # voisins. Dimensionne sur la consommation observee en prod (6m CPU, 25 Mi)
+  # avec la marge des pics d'ecriture et du cache partage de PostgreSQL.
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
 
 resources:
   requests:
